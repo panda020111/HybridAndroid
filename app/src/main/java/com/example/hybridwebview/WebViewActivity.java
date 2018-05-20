@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.core.ContainerAction;
 import com.example.core.ContainerInterface;
 import com.example.core.HybridController;
 import com.example.core.HybridWebViewImpl;
@@ -34,7 +35,6 @@ public class WebViewActivity extends Activity implements ContainerInterface {
 
     private HybridWebViewImpl mWebViewImpl;
     private ProgressBar mProgressBar;
-    
 
     private View mErrorView;
 
@@ -62,7 +62,7 @@ public class WebViewActivity extends Activity implements ContainerInterface {
         });
 
         //todo add searchBar
-        String url = "http://act.mogujie.com/519/h5";
+        String url = "http://m.baidu.com";
         doCreate(url);
     }
 
@@ -79,7 +79,7 @@ public class WebViewActivity extends Activity implements ContainerInterface {
     }
 
     /**
-     *
+     * do some action to activity;
      * @param action
      * @param callback
      * @param args
@@ -87,15 +87,15 @@ public class WebViewActivity extends Activity implements ContainerInterface {
     @Override
     public void performAction(String action, ActionCallback callback, String... args) {
 
-        if ("onReceiveTitle".equals(action)) {
+        if (ContainerAction.ACTION_SET_TITLE.equals(action)) {
             setTitle(args[0]);
-        } else if ("onShowProgress".equals(action)) {
+        } else if (ContainerAction.ACTION_SHOW_PROGRESS.equals(action)) {
             showProgressing();
-        } else if ("onHideProgress".equals(action)) {
+        } else if (ContainerAction.ACTION_HIDE_PROGRESS.equals(action)) {
             hideProgressing();
-        } else if ("onReceivedError".equals(action)) {
+        } else if (ContainerAction.ACTION_SHOW_ERROR_PAGE.equals(action)) {
             showErrorPage();
-        } else if ("onHideErrorPage".equals(action)) {
+        } else if (ContainerAction.ACTION_HIDE_ERROR_PAGE.equals(action)) {
             hideErrorPage();
         }
 
@@ -116,17 +116,29 @@ public class WebViewActivity extends Activity implements ContainerInterface {
     }
 
     private void hideProgressing() {
-        if (mTitleTv != null) {
+        if (mProgressBar != null) {
             mProgressBar.setVisibility(View.GONE);
         }
     }
 
     private void showErrorPage() {
+        if (mErrorView == null) {
+            mErrorView = getLayoutInflater().inflate(R.layout.webview_error, null);
+            mBodyLayout.addView(mErrorView);
+        } else {
+            mErrorView.setVisibility(View.VISIBLE);
+        }
+        setTitle("加载失败");
 
     }
 
     private void hideErrorPage() {
-
+        if (mErrorView == null) {
+            return ;
+        }
+        if (mErrorView.getVisibility() == View.VISIBLE) {
+            mErrorView.setVisibility(View.GONE);
+        }
     }
 
     @Override
