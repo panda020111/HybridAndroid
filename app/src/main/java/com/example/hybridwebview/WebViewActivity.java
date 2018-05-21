@@ -98,6 +98,9 @@ public class WebViewActivity extends Activity implements ContainerInterface {
         } else if (ContainerAction.ACTION_HIDE_ERROR_PAGE.equals(action)) {
             hideErrorPage();
         }
+
+
+        
     }
 
     private void setTitle(String title) {
