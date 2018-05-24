@@ -1,5 +1,7 @@
 package com.example.core;
 
+import org.json.JSONObject;
+
 /**
  * Created by yunchang on 2018/5/16.
  */
@@ -25,6 +27,36 @@ public class PluginResult {
         this.status = status.ordinal();
         this.messageType = message == null ? MESSAGE_TYPE_NULL : MESSAGE_TYPE_STRING;
         this.message = message;
+    }
+
+    public PluginResult(Status status, JSONObject message) {
+        this.status = status.ordinal();
+        this.messageType = MESSAGE_TYPE_JSON;
+        this.message = message.toString();
+    }
+
+    public PluginResult(Status status, int i) {
+        this.status = status.ordinal();
+        this.messageType = MESSAGE_TYPE_NUMBER;
+        this.message = "" + i;
+    }
+
+    public PluginResult(Status status, boolean b) {
+        this.status = status.ordinal();
+        this.messageType = MESSAGE_TYPE_BOOLEAN;
+        this.message = Boolean.toString(b);
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public int getMessageType() {
+        return messageType;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public static String[] StatusMessages = new String[] {

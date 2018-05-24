@@ -29,6 +29,10 @@ public class HybridPlugin {
 
     }
 
+    public void sendPluginResult(PluginResult result, CallbackContext callbackContext) {
+        callbackContext.sendPluginResult(result);
+    }
+
     public boolean execute(String action, String rawArgs, CallbackContext callbackContext) {
         return false;
     }

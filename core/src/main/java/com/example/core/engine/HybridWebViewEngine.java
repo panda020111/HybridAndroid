@@ -45,7 +45,7 @@ public class HybridWebViewEngine {
     public void init(HybridWebViewInterface parentWebView, PluginManager pluginManager, NativeToJsMessageQueue messageQueue) {
         this.parentWebView = parentWebView;
         this.mPluginManager = pluginManager;
-        this.mNativeToJsMessageQueue = mNativeToJsMessageQueue;
+        this.mNativeToJsMessageQueue = messageQueue;
 
         // 初始化webview
         mWebView.init(this);

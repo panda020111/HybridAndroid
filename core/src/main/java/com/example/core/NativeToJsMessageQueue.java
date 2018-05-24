@@ -29,14 +29,20 @@ public class NativeToJsMessageQueue {
         }
 
         JsMessage message = new JsMessage(callbackId, result);
-
+        queue.add(message);
     }
 
     // 将结果返回到；
     public String popAndEncode() {
         synchronized (this) {
-            String ret = null;
-            return ret;
+            if (queue.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+                JsMessage jsMessage = queue.removeFirst();
+                jsMessage.encodeMessage(sb);
+
+                return sb.toString();
+            }
+            return "";
         }
     }
 
@@ -63,6 +69,34 @@ public class NativeToJsMessageQueue {
         }
 
 
+        public static void encodeMessageHelper(StringBuilder sb, PluginResult result) {
+            switch (result.getMessageType()) {
+                case PluginResult.MESSAGE_TYPE_BOOLEAN:
+                    sb.append(result.getMessage().charAt(0));  // t or f;
+                    break;
+                case PluginResult.MESSAGE_TYPE_NULL:
+                    sb.append("N");
+                    break;
+                case PluginResult.MESSAGE_TYPE_STRING:
+                    sb.append("s");
+                    sb.append(result.getMessage());
+                    break;
+                default:
+                    sb.append(result.getMessage());
+            }
+        }
 
+        public void encodeMessage(StringBuilder sb) {
+            int status = mPluginResult.getStatus();
+            boolean resultOk = status == PluginResult.Status.OK.ordinal();
+            sb.append(resultOk ? "S" : "F")
+                    .append(status)
+                    .append(" ")
+                    .append(jsPayloadOrCallBackId)
+                    .append(" ");
+
+            encodeMessageHelper(sb, mPluginResult);
+
+        }
     }
 }

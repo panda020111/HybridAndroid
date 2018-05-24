@@ -17,12 +17,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btn = findViewById(R.id.btn);
+        btn = findViewById(R.id.btn_1);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Hello press", Toast.LENGTH_SHORT).show();
+
                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                intent.putExtra("url", "http://m.baidu.com");
+                startActivity(intent);
+            }
+        });
+
+        btn = findViewById(R.id.btn_2);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                intent.putExtra("url", "http://172.17.62.61:8080/");
                 startActivity(intent);
             }
         });

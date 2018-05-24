@@ -1,6 +1,7 @@
 package com.example.hybridwebview;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -14,7 +15,6 @@ import android.widget.TextView;
 
 import com.example.core.ContainerAction;
 import com.example.core.ContainerInterface;
-import com.example.core.HybridController;
 import com.example.core.HybridWebViewImpl;
 import com.example.core.engine.HybridWebViewEngine;
 
@@ -31,11 +31,8 @@ public class WebViewActivity extends Activity implements ContainerInterface {
     private RelativeLayout mTitleLayout;
     private TextView mTitleTv;
     private ImageView mLeftBtn;
-    private HybridController mHybridController;
-
     private HybridWebViewImpl mWebViewImpl;
     private ProgressBar mProgressBar;
-
     private View mErrorView;
 
     @Override
@@ -62,18 +59,21 @@ public class WebViewActivity extends Activity implements ContainerInterface {
         });
 
         //todo add searchBar
-        String url = "http://m.baidu.com";
+        Intent intent = getIntent();
+        String url = intent.getStringExtra("url");
+        Log.d(TAG, "onCreate: url =====>" + url);
         doCreate(url);
     }
 
     /**
-     * init HybridController
+     * init
      */
     private void doCreate(String url) {
 
         mWebViewImpl = new HybridWebViewImpl(new HybridWebViewEngine(getApplicationContext()), this);
         mBodyLayout.addView(mWebViewImpl.getView());
 
+        setTitle("加载中...");
         // show web page;
         mWebViewImpl.showWebPage(url, false, false, null);
     }
@@ -99,8 +99,6 @@ public class WebViewActivity extends Activity implements ContainerInterface {
             hideErrorPage();
         }
 
-
-        
     }
 
     private void setTitle(String title) {

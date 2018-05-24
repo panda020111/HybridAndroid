@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import com.example.core.engine.HybridWebViewEngine;
-import com.example.core.plugins.ClientPlugin;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -87,6 +86,7 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
     }
 
     private void loadPluginsConfig() {
-        this.mPluginEntries.add(new PluginEntry("Client Plugin", "com.example.core.plugins.ClientPlugin", true));
+        this.mPluginEntries.add(new PluginEntry("ClientPlugin", "com.example.core.plugins.ClientPlugin", true));
+        this.mPluginEntries.add(new PluginEntry("hybrid.device", "com.example.core.plugins.DevicePlugin", false));
     }
 }
