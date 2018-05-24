@@ -70,7 +70,7 @@ public class WebViewActivity extends Activity implements ContainerInterface {
      */
     private void doCreate(String url) {
 
-        mWebViewImpl = new HybridWebViewImpl(new HybridWebViewEngine(getApplicationContext()), this);
+        mWebViewImpl = new HybridWebViewImpl(new HybridWebViewEngine(getApplicationContext()), this, this);
         mBodyLayout.addView(mWebViewImpl.getView());
 
         setTitle("加载中...");

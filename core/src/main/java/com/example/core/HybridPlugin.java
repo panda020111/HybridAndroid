@@ -2,7 +2,11 @@ package com.example.core;
 
 import android.net.Uri;
 import android.net.http.SslError;
+import android.telecom.Call;
 import android.webkit.SslErrorHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * Created by yunchang on 2018/5/16.
@@ -33,7 +37,19 @@ public class HybridPlugin {
         callbackContext.sendPluginResult(result);
     }
 
-    public boolean execute(String action, String rawArgs, CallbackContext callbackContext) {
+    /**
+     * @param action
+     * @param rawArgs
+     * @param callbackContext
+     * @return
+     */
+    public boolean execute(String action, String rawArgs, CallbackContext callbackContext) throws JSONException {
+        JSONArray args = new JSONArray(rawArgs);
+        return execute(action, args, callbackContext);
+    }
+
+
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext)throws JSONException {
         return false;
     }
 

@@ -29,10 +29,12 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
 
     // act with activity;
     public ContainerInterface mContainerInterface;
+    public Context mContext;
 
-    public HybridWebViewImpl(HybridWebViewEngine engine, ContainerInterface containerInterface) {
+    public HybridWebViewImpl(HybridWebViewEngine engine, ContainerInterface containerInterface, Context context) {
         this.mEngine = engine;
         mContainerInterface = containerInterface;
+        this.mContext = context;
         init();
     }
 
@@ -88,5 +90,6 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
     private void loadPluginsConfig() {
         this.mPluginEntries.add(new PluginEntry("ClientPlugin", "com.example.core.plugins.ClientPlugin", true));
         this.mPluginEntries.add(new PluginEntry("hybrid.device", "com.example.core.plugins.DevicePlugin", false));
+        this.mPluginEntries.add(new PluginEntry("hybrid.notification", "com.example.core.plugins.NotificationPlugin", false));
     }
 }

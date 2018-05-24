@@ -130,11 +130,16 @@ public class PluginManager {
         CallbackContext callbackContext = new CallbackContext(webView, callbackId);
 
         // todo 记录下超时；
-        boolean wasValidAction = plugin.execute(action, rawArgs, callbackContext);
-        if (!wasValidAction) {
-            PluginResult pluginResult = new PluginResult(PluginResult.Status.INVALID_ACTION);
-            callbackContext.sendPluginResult(pluginResult);
+        try {
+            boolean wasValidAction = plugin.execute(action, rawArgs, callbackContext);
+            if (!wasValidAction) {
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.INVALID_ACTION);
+                callbackContext.sendPluginResult(pluginResult);
+            }
+        } catch (Exception e) {
+
         }
+
     }
 
 
