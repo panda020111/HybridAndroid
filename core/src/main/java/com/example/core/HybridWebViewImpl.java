@@ -1,16 +1,19 @@
 package com.example.core;
 
-import android.content.Context;
+import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import com.example.core.engine.HybridWebViewEngine;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by yunchang on 2018/5/14.
@@ -19,36 +22,38 @@ import static android.content.ContentValues.TAG;
 public class HybridWebViewImpl implements HybridWebViewInterface {
 
     private static final String TAG = "HybridWebViewImpl";
-
     private PluginManager mPluginManager;
-    private HybridWebViewEngine mEngine;
+    protected final HybridWebViewEngine mEngine;
+    private String userAgent;
     private NativeToJsMessageQueue mNativeToJsMessageQueue;
-    private LinkedHashMap<String, PluginEntry> entryMap = new LinkedHashMap<>();
 
     private List<PluginEntry> mPluginEntries = new ArrayList<>();
 
     // act with activity;
     public ContainerInterface mContainerInterface;
-    public Context mContext;
+    public Activity mActivity;
 
-    public HybridWebViewImpl(HybridWebViewEngine engine, ContainerInterface containerInterface, Context context) {
+    private boolean isLoading = true;
+    private ExecutorService threadPool;
+
+    public HybridWebViewImpl(HybridWebViewEngine engine, ContainerInterface containerInterface, String userAgent, Activity activity) {
         this.mEngine = engine;
         mContainerInterface = containerInterface;
-        this.mContext = context;
+        this.mActivity = activity;
+        this.userAgent = userAgent;
+        this.threadPool = Executors.newCachedThreadPool();
         init();
     }
 
     /**
      * init plugin manager and nativeToJsMessageQueue;
      */
-    public void init() {
-
+    private void init() {
         loadPluginsConfig();
-
         Log.d(TAG, "init: Hybrid WebView impl");
         mPluginManager = new PluginManager(this, mPluginEntries);
         mNativeToJsMessageQueue = new NativeToJsMessageQueue();
-        mEngine.init(this, mPluginManager, mNativeToJsMessageQueue);
+        mEngine.init(this, mPluginManager, mNativeToJsMessageQueue, this.userAgent);
     }
 
     @Override
@@ -57,11 +62,58 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
     }
 
     @Override
-    public void loadUrlIntoView(String url) {
-        Log.d(TAG, "loadUrlIntoView: url ==" + url);
+    public void loadUrlIntoView(final String url) {
+        Log.d(TAG, "loadUrlIntoView: url " + url);
+
+        final int loadUrlTimeoutValue = 8000;
 
         // todo request timeout处理error的相关逻辑;
-        mEngine.loadUrl(url);
+        final Runnable loadError = new Runnable() {
+            @Override
+            public void run() {
+                stopLoading();
+                Log.d(TAG, "run: HybridWebview: Timeout error");
+                JSONObject data = new JSONObject();
+                try {
+                    data.put("errorCode", -6);
+                    data.put("description", "The connection was unsuccessful");
+                    data.put("url", url);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                mPluginManager.postMessage("onReceivedError", data);
+            }
+        };
+
+        final Runnable timeoutCheck = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    synchronized (this) {
+                        // 休息8 seconds;
+                        wait(loadUrlTimeoutValue);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                if (isLoading) {
+                    mActivity.runOnUiThread(loadError);
+                }
+            }
+        };
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (loadUrlTimeoutValue > 0) {
+                    threadPool.execute(timeoutCheck);
+                }
+
+                mEngine.loadUrl(url);
+            }
+        });
     }
 
     @Override
@@ -80,6 +132,10 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
     @Override
     public void reload() {
 
+    }
+
+    public void stopLoading () {
+        isLoading = false;
     }
 
     @Override

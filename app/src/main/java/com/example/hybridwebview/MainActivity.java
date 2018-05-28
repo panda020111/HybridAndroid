@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
-                intent.putExtra("url", "http://172.17.62.61:8080/");
+//                intent.putExtra("url", "http://172.17.62.61:8080/");
+                intent.putExtra("url", "http://192.168.31.102:8080/");
                 startActivity(intent);
             }
         });

@@ -36,7 +36,7 @@ public class NotificationPlugin extends HybridPlugin {
 
     public void alert(final String message, final String title, final String buttonLabel, final CallbackContext callbackContext) {
         // ui相关需要context;
-        AlertDialog.Builder builder = new AlertDialog.Builder(webview.mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(webview.mActivity);
         if (!TextUtils.isEmpty(title)) {
             builder.setTitle(title);
         }
@@ -49,7 +49,7 @@ public class NotificationPlugin extends HybridPlugin {
         builder.setPositiveButton(buttonLabel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(webview.mContext, "Yes", Toast.LENGTH_SHORT).show();
+                Toast.makeText(webview.mActivity, "Yes", Toast.LENGTH_SHORT).show();
                 callbackContext.success("success");
             }
         });

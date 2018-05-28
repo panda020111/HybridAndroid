@@ -29,7 +29,7 @@ public class HybridWebViewEngine {
     private static final String TAG = "HybridWebViewEngine";
 
     private final SystemWebView mWebView;
-    private HybridWebViewInterface parentWebView;
+    public HybridWebViewInterface parentWebView;
     private NativeToJsMessageQueue mNativeToJsMessageQueue;
     private HybridBridge bridge;
     public PluginManager mPluginManager;
@@ -42,7 +42,7 @@ public class HybridWebViewEngine {
         this.mWebView = webView;
     }
 
-    public void init(HybridWebViewInterface parentWebView, PluginManager pluginManager, NativeToJsMessageQueue messageQueue) {
+    public void init(HybridWebViewInterface parentWebView, PluginManager pluginManager, NativeToJsMessageQueue messageQueue, String userAgent) {
         this.parentWebView = parentWebView;
         this.mPluginManager = pluginManager;
         this.mNativeToJsMessageQueue = messageQueue;
@@ -53,15 +53,14 @@ public class HybridWebViewEngine {
         mWebView.setInitialScale(0);
         mWebView.setVerticalScrollBarEnabled(false);
         initWebViewSettings();
+        setUserAgent(userAgent);
 
         // 初始化Bridge
         bridge = new HybridBridge(pluginManager, mNativeToJsMessageQueue);
         exposeJsInterface(mWebView, bridge);
-
     }
 
     private void initWebViewSettings() {
-
 
         // Enable JavaScript
         final WebSettings settings = mWebView.getSettings();
@@ -76,7 +75,6 @@ public class HybridWebViewEngine {
             e.printStackTrace();
         }
 
-        // Set the nav dump for HTC 2.x devices (disabling for ICS, deprecated entirely for Jellybean 4.2)
         try {
             Method gingerbread_getMethod =  WebSettings.class.getMethod("setNavDump", new Class[] { boolean.class });
 
@@ -101,7 +99,6 @@ public class HybridWebViewEngine {
         settings.setSaveFormData(false);
         settings.setSavePassword(false);
 
-        // Jellybean rightfully tried to lock this down. Too bad they didn't give us a whitelist
         // while we do this
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
             settings.setAllowUniversalAccessFromFileURLs(true);
@@ -132,10 +129,25 @@ public class HybridWebViewEngine {
         mWebView.loadUrl(url);
     }
 
+    public void syncCookies() {
+
+    }
+
+    public void setUserAgent (String userAgent) {
+        WebSettings webSettings = mWebView.getSettings();
+        String ua = webSettings.getUserAgentString();
+
+        String new_Ua = ua + " " + userAgent;
+        webSettings.setUserAgentString(new_Ua);
+
+        Log.d(TAG, "setUserAgent: user agent ===> " + webSettings.getUserAgentString());
+    }
+
     // 将bridge定义的接口暴露给webview；
     private static void exposeJsInterface(WebView webView, HybridBridge bridge) {
         ExposeJsApi exposeJsApi = new ExposeJsApi(bridge);
         webView.addJavascriptInterface(exposeJsApi, "_HybridNative");
     }
+
 }
 

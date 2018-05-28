@@ -20,6 +20,8 @@ public interface HybridWebViewInterface {
 
     void reload();
 
+    void stopLoading();
+
     Object postMessage(String id, Object data);
 
     void sendPluginResult(PluginResult pluginResult, String callbackId);

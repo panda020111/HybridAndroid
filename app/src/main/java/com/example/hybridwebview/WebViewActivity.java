@@ -70,7 +70,7 @@ public class WebViewActivity extends Activity implements ContainerInterface {
      */
     private void doCreate(String url) {
 
-        mWebViewImpl = new HybridWebViewImpl(new HybridWebViewEngine(getApplicationContext()), this, this);
+        mWebViewImpl = new HybridWebViewImpl(new HybridWebViewEngine(getApplicationContext()), this, "hybrid_app", this);
         mBodyLayout.addView(mWebViewImpl.getView());
 
         setTitle("加载中...");
@@ -122,6 +122,10 @@ public class WebViewActivity extends Activity implements ContainerInterface {
     }
 
     private void showErrorPage() {
+        if (mProgressBar != null && mProgressBar.getVisibility() == View.VISIBLE) {
+            hideProgressing();
+        }
+
         if (mErrorView == null) {
             mErrorView = getLayoutInflater().inflate(R.layout.webview_error, null);
             mBodyLayout.addView(mErrorView);

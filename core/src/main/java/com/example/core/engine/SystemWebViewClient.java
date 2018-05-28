@@ -1,6 +1,10 @@
 package com.example.core.engine;
 
 import android.graphics.Bitmap;
+import android.net.http.SslError;
+import android.webkit.ClientCertRequest;
+import android.webkit.HttpAuthHandler;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -39,7 +43,7 @@ public class SystemWebViewClient extends WebViewClient  {
     @Override
     public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 
-//        super.onReceivedError(view, errorCode, description, failingUrl);
+        mParentEngine.parentWebView.stopLoading();
 
         // 封装下data
         JSONObject data = new JSONObject();
@@ -51,6 +55,20 @@ public class SystemWebViewClient extends WebViewClient  {
             e.printStackTrace();
         }
 
-        mParentEngine.mPluginManager.postMessage("onReceiveError", data);
+        mParentEngine.mPluginManager.postMessage("onReceivedError", data);
+    }
+
+    @Override
+    public void onReceivedClientCertRequest(WebView view, ClientCertRequest request) {
+        // 消除下timeout error；
+        mParentEngine.parentWebView.stopLoading();
+        super.onReceivedClientCertRequest(view, request);
+    }
+
+
+    @Override
+    public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+        mParentEngine.parentWebView.stopLoading();
+        super.onReceivedHttpAuthRequest(view, handler, host, realm);
     }
 }

@@ -19,9 +19,9 @@ public class ClientPlugin extends HybridPlugin {
             onPageStarted((String) data);
         } else if (id.equals("onPageFinished")) {
             onPageFinished((String) data);
-        } else if (id.equals("onReceiveTitle")) {
+        } else if (id.equals("onReceivedTitle")) {
             onReceiveTitle((String) data);
-        } else if (id.equals("onReceiveError")) {
+        } else if (id.equals("onReceivedError")) {
             onReceiveError();
         }
 

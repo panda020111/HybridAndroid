@@ -17,12 +17,12 @@ public class SystemWebChromeClient extends WebChromeClient {
         mParentEngine = parentEngine;
     }
 
-
     @Override
     public void onReceivedTitle(WebView view, String title) {
         super.onReceivedTitle(view, title);
-        mParentEngine.mPluginManager.postMessage("onReceiveTitle", title);
+        mParentEngine.mPluginManager.postMessage("onReceivedTitle", title);
     }
 
+    // todo 添加其他的代理
 
 }
