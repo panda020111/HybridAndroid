@@ -20,6 +20,8 @@ public interface HybridWebViewInterface {
 
     void reload();
 
+    void loadUrl(String url);
+
     void stopLoading();
 
     Object postMessage(String id, Object data);

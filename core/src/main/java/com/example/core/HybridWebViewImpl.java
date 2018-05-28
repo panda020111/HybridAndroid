@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import com.example.core.engine.HybridWebViewEngine;
+import com.example.core.utils.FileUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +55,9 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
         mPluginManager = new PluginManager(this, mPluginEntries);
         mNativeToJsMessageQueue = new NativeToJsMessageQueue();
         mEngine.init(this, mPluginManager, mNativeToJsMessageQueue, this.userAgent);
+
+        // 注入main.js
+        injectMainJS();
     }
 
     @Override
@@ -64,6 +68,12 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
     @Override
     public void loadUrlIntoView(final String url) {
         Log.d(TAG, "loadUrlIntoView: url " + url);
+
+        if (url.equals("about:black") || url.startsWith("javascript:")) {
+            mEngine.loadUrl(url);
+
+            return ;
+        }
 
         final int loadUrlTimeoutValue = 8000;
 
@@ -134,6 +144,12 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
 
     }
 
+    @Override
+    public void loadUrl(String url) {
+        loadUrlIntoView(url);
+    }
+
+    @Override
     public void stopLoading () {
         isLoading = false;
     }
@@ -147,5 +163,11 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
         this.mPluginEntries.add(new PluginEntry("ClientPlugin", "com.example.core.plugins.ClientPlugin", true));
         this.mPluginEntries.add(new PluginEntry("hybrid.device", "com.example.core.plugins.DevicePlugin", false));
         this.mPluginEntries.add(new PluginEntry("hybrid.notification", "com.example.core.plugins.NotificationPlugin", false));
+    }
+
+    private void injectMainJS() {
+        String jsContent = FileUtils.getScript(mActivity, "main.js");
+        String buildString = String.format("javascript:%s", jsContent);
+        mEngine.loadUrl(buildString);
     }
 }
