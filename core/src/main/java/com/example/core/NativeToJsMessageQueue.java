@@ -2,6 +2,8 @@ package com.example.core;
 
 import android.util.Log;
 
+import com.example.core.engine.HybridWebViewEngine;
+
 import java.util.LinkedList;
 
 /**
@@ -14,12 +16,25 @@ public class NativeToJsMessageQueue {
 
     private final LinkedList<JsMessage> queue = new LinkedList<>();
 
+    public final HybridWebViewEngine mEngine;
+    private HybridWebViewImpl mWebView;
+
+    public NativeToJsMessageQueue(HybridWebViewEngine engine, HybridWebViewImpl hybridWebView) {
+        mEngine = engine;
+        mWebView = hybridWebView;
+    }
+
+    // 设置访问的状态
     private boolean paused;
 
     public void reset() {
         synchronized (this) {
             queue.clear();
         }
+    }
+
+    public void setPaused (boolean status) {
+        paused = status;
     }
 
     public void addPluginResult(PluginResult result, String callbackId) {
@@ -29,10 +44,10 @@ public class NativeToJsMessageQueue {
         }
 
         JsMessage message = new JsMessage(callbackId, result);
-        queue.add(message);
+        enqueueMessage(message);
     }
 
-    // 将结果返回到；
+    // 同步调用会在队列中直接获取message
     public String popAndEncode() {
         synchronized (this) {
             if (queue.size() > 0) {
@@ -46,13 +61,44 @@ public class NativeToJsMessageQueue {
         }
     }
 
-    private void enqueueMessage(JsMessage message) {
-        synchronized (this) {
-            queue.add(message);
 
+    public String popAndEncodeAsJs() {
+        synchronized (this) {
+
+            StringBuilder sb = new StringBuilder();
+            JsMessage message = queue.removeFirst();
+            message.encodeAsJsMessage(sb);
+
+            String ret = sb.toString();
+            return ret;
         }
     }
 
+    private void enqueueMessage(JsMessage message) {
+        synchronized (this) {
+            queue.add(message);
+            // async
+            if (!this.paused) {
+                this.onNativeToJsMessageAvailable();
+            }
+        }
+    }
+
+    private void onNativeToJsMessageAvailable() {
+        if (queue.size() > 0) {
+            this.mWebView.mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String js = popAndEncodeAsJs();
+                    if (js != null) {
+                        Log.d(TAG, "onNativeToJsMessageAvailable: " + js);
+                        mEngine.evaluateJavascript(js);
+                    }
+                }
+            });
+
+        }
+    }
 
     private static class JsMessage {
         final String jsPayloadOrCallBackId;
@@ -97,6 +143,25 @@ public class NativeToJsMessageQueue {
 
             encodeMessageHelper(sb, mPluginResult);
 
+        }
+
+        public void encodeAsJsMessage(StringBuilder sb) {
+            if (mPluginResult == null) {
+                sb.append(jsPayloadOrCallBackId);
+            } else {
+                int status = mPluginResult.getStatus();
+                boolean success = (status == PluginResult.Status.OK.ordinal()) || (status == PluginResult.Status.NO_RESULT.ordinal());
+                sb.append("cordova.callbackFromNative('")
+                        .append(jsPayloadOrCallBackId)
+                        .append("',")
+                        .append(success)
+                        .append(",")
+                        .append(status)
+                        .append(",[");
+
+                sb.append(mPluginResult.getMessage());
+                sb.append("]").append(");");
+            }
         }
     }
 }

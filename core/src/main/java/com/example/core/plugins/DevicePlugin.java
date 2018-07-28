@@ -14,7 +14,7 @@ public class DevicePlugin extends HybridPlugin {
     private static final String TAG = "DevicePlugin";
 
     @Override
-    public boolean execute(String action, String rawArgs, CallbackContext callbackContext) {
+    public boolean execute(String action, String rawArgs, final CallbackContext callbackContext) {
         if (action.equals("getDeviceInfo")) {
             DeviceInfo deviceInfo = new DeviceInfo();
 
@@ -25,8 +25,22 @@ public class DevicePlugin extends HybridPlugin {
 
             sendPluginResult(pluginResult, callbackContext);
             return true;
+        } else if (action.equals("getDeviceInfoAsync")) {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    DeviceInfo deviceInfo = new DeviceInfo();
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, new Gson().toJson(deviceInfo, DeviceInfo.class));
+
+                    if (pluginResult != null) {
+                        sendPluginResult(pluginResult, callbackContext);
+                    }
+                }
+            };
+
+            this.webview.getThreadPool().execute(r);
         }
-        return false;
+        return true;
     }
 
     public static class DeviceInfo {

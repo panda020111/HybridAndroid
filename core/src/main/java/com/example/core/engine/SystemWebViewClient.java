@@ -37,12 +37,12 @@ public class SystemWebViewClient extends WebViewClient  {
     @Override
     public void onPageFinished(WebView view, String url) {
         mParentEngine.mPluginManager.postMessage("onPageFinished", url);
+        mParentEngine.parentWebView.stopLoading();
         super.onPageFinished(view, url);
     }
 
     @Override
     public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-
         mParentEngine.parentWebView.stopLoading();
 
         // 封装下data

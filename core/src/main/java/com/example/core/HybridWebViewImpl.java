@@ -5,16 +5,13 @@ import android.util.Log;
 import android.view.View;
 import com.example.core.engine.HybridWebViewEngine;
 import com.example.core.utils.FileUtils;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 /**
  * Created by yunchang on 2018/5/14.
@@ -53,11 +50,16 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
         loadPluginsConfig();
         Log.d(TAG, "init: Hybrid WebView impl");
         mPluginManager = new PluginManager(this, mPluginEntries);
-        mNativeToJsMessageQueue = new NativeToJsMessageQueue();
+        mNativeToJsMessageQueue = new NativeToJsMessageQueue(mEngine, this);
         mEngine.init(this, mPluginManager, mNativeToJsMessageQueue, this.userAgent);
 
         // 注入main.js
         injectMainJS();
+    }
+
+
+    public ExecutorService getThreadPool() {
+        return threadPool;
     }
 
     @Override
@@ -75,7 +77,8 @@ public class HybridWebViewImpl implements HybridWebViewInterface {
             return ;
         }
 
-        final int loadUrlTimeoutValue = 8000;
+        // 设置timeout时间;
+        final int loadUrlTimeoutValue = 20000;
 
         // todo request timeout处理error的相关逻辑;
         final Runnable loadError = new Runnable() {

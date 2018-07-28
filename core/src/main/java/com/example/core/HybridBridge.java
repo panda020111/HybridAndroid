@@ -16,8 +16,13 @@ public class HybridBridge {
 
     public String jsExec(int bridgeSecret, String service, String action, String callbackId, String arguments) {
         // 执行插件
+
+        this.messageQueue.setPaused(true);
+
         mPluginManager.exec(service, action, callbackId, arguments);
         String ret = messageQueue.popAndEncode();
+
+        this.messageQueue.setPaused(false);
         return ret;
     }
 }

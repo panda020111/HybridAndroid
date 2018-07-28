@@ -129,6 +129,10 @@ public class HybridWebViewEngine {
         mWebView.loadUrl(url);
     }
 
+    public void evaluateJavascript(String js) {
+        mWebView.evaluateJavascript(js, null);
+    }
+
     public void syncCookies() {
 
     }
